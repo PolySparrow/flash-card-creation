@@ -1,0 +1,543 @@
+Total Questions: 47
+================================================================================
+
+Question 1:
+Type: SINGLE
+A Data Engineer is investigating a query that is taking a long time to return. The Query Profile shows the following:What step should the Engineer take to increase the query performance?
+
+  [ ] A. Add additional virtual warehouses.
+  [✓] B. Increase the size of the virtual warehouse.
+  [ ] C. Rewrite the query using Common Table Expressions (CTEs).
+  [ ] D. Change the order of the joins and start with smaller tables first.
+
+--------------------------------------------------------------------------------
+
+Question 2:
+Type: SINGLE
+How can the following relational data be transformed into semi-structured data using the LEAST amount of operational overhead?
+
+  [ ] A. Use the TO_JSON function.
+  [ ] B. Use the PARSE_JSON function to produce a VARIANT value.
+  [✓] C. Use the OBJECT_CONSTRUCT function to return a Snowflake object.
+  [ ] D. Use the TO_VARIANT function to convert each of the relational columns to VARIANT.
+
+--------------------------------------------------------------------------------
+
+Question 3:
+Type: MULTIPLE
+A Data Engineer executes a complex query and wants to make use of Snowflake’s query results caching capabilities to reuse the results.Which conditions must be met? (Choose three.)
+
+  [ ] A. The results must be reused within 72 hours.
+  [ ] B. The query must be executed using the same virtual warehouse.
+  [ ] C. The USED_CACHED_RESULT parameter must be included in the query.
+  [✓] D. The table structure contributing to the query result cannot have changed.
+  [✓] E. The new query must have the same syntax as the previously executed query.
+  [✓] F. The micro-partitions cannot have changed due to changes to other data in the table.
+
+--------------------------------------------------------------------------------
+
+Question 4:
+Type: MULTIPLE
+A Data Engineer needs to load JSON output from some software into Snowflake using Snowpipe.Which recommendations apply to this scenario? (Choose three.)
+
+  [ ] A. Load large files (1 GB or larger).
+  [✓] B. Ensure that data files are 100-250 MB (or larger) in size, compressed.
+  [ ] C. Load a single huge array containing multiple records into a single table row.
+  [✓] D. Verify each value of each unique element stores a single native data type (string or number).
+  [✓] E. Extract semi-structured data elements containing null values into relational columns before loading.
+  [ ] F. Create data files that are less than 100 MB and stage them in cloud storage at a sequence greater than once each minute.
+
+--------------------------------------------------------------------------------
+
+Question 5:
+Type: SINGLE
+Given the table SALES which has a clustering key of column CLOSED_DATE, which table function will return the average clustering depth for the SALES_REPRESENTATIVE column for the North American region?
+
+  [ ] A. select system$clustering_information('Sales', 'sales_representative', 'region = ''North America''');
+  [✓] B. select system$clustering_depth('Sales', 'sales_representative', 'region = ''North America''');
+  [ ] C. select system$clustering_depth('Sales', 'sales_representative') where region = 'North America';
+  [ ] D. select system$clustering_information('Sales', 'sales_representative') where region = 'North America’;
+
+--------------------------------------------------------------------------------
+
+Question 6:
+Type: SINGLE
+A large table with 200 columns contains two years of historical data. When queried, the table is filtered on a single day. Below is the Query Profile:Using a size 2XL virtual warehouse, this query took over an hour to complete.What will improve the query performance the MOST?
+
+  [ ] A. Increase the size of the virtual warehouse.
+  [ ] B. Increase the number of clusters in the virtual warehouse.
+  [ ] C. Implement the search optimization service on the table.
+  [✓] D. Add a date column as a cluster key on the table.
+
+--------------------------------------------------------------------------------
+
+Question 7:
+Type: MULTIPLE
+A Data Engineer is working on a Snowflake deployment in AWS eu-west-1 (Ireland). The Engineer is planning to load data from staged files into target tables using the COPY INTO command.Which sources are valid? (Choose three.)
+
+  [ ] A. Internal stage on GCP us-central1 (Iowa)
+  [ ] B. Internal stage on AWS eu-central-1 (Frankfurt)
+  [✓] C. External stage on GCP us-central1 (Iowa)
+  [✓] D. External stage in an Amazon S3 bucket on AWS eu-west-1 (Ireland)
+  [✓] E. External stage in an Amazon S3 bucket on AWS eu-central-1 (Frankfurt)
+  [ ] F. SSD attached to an Amazon EC2 instance on AWS eu-west-1 (Ireland)
+
+--------------------------------------------------------------------------------
+
+Question 8:
+Type: SINGLE
+A Data Engineer wants to create a new development database (DEV) as a clone of the permanent production database (PROD). There is a requirement to disable Fail-safe for all tables.Which command will meet these requirements?
+
+  [ ] A. CREATE DATABASE DEV -CLONE PROD -FAIL_SAFE = FALSE;
+  [ ] B. CREATE DATABASE DEV -CLONE PROD;
+  [✓] C. CREATE TRANSIENT DATABASE DEV -CLONE PROD;
+  [ ] D. CREATE DATABASE DEV -CLONE PROD -DATA_RETENTION_TIME_IN DAYS = 0;
+
+--------------------------------------------------------------------------------
+
+Question 9:
+Type: MULTIPLE
+Which methods can be used to create a DataFrame object in Snowpark? (Choose three.)
+
+  [ ] A. session.jdbc_connection()
+  [✓] B. session.read.json()
+  [✓] C. session.table()
+  [ ] D. DataFrame.write()
+  [ ] E. session.builder()
+  [✓] F. session.sql()
+
+--------------------------------------------------------------------------------
+
+Question 10:
+Type: MULTIPLE
+A new CUSTOMER table is created by a data pipeline in a Snowflake schema where MANAGED ACCESS is enabled.Which roles can grant access to the CUSTOMER table? (Choose three.)
+
+  [✓] A. The role that owns the schema
+  [ ] B. The role that owns the database
+  [ ] C. The role that owns the CUSTOMER table
+  [ ] D. The SYSADMIN role
+  [✓] E. The SECURITYADMIN role
+  [✓] F. The USERADMIN role with the MANAGE GRANTS privilege
+
+--------------------------------------------------------------------------------
+
+Question 11:
+Type: SINGLE
+What is the purpose of the BUILD_STAGE_FILE_URL function in Snowflake?
+
+  [ ] A. It generates an encrypted URL for accessing a file in a stage.
+  [ ] B. It generates a staged URL for accessing a file in a stage.
+  [✓] C. It generates a permanent URL for accessing files in a stage.
+  [ ] D. It generates a temporary URL for accessing a file in a stage.
+
+--------------------------------------------------------------------------------
+
+Question 12:
+Type: MULTIPLE
+A company has an extensive script in Scala that transforms data by leveraging DataFrames. A Data Engineer needs to move these transformations to Snowpark.What characteristics of data transformations in Snowpark should be considered to meet this requirement? (Choose two.)
+
+  [✓] A. It is possible to join multiple tables using DataFrames.
+  [✓] B. Snowpark operations are executed lazily on the server.
+  [ ] C. User-Defined Functions (UDFs) are not pushed down to Snowflake.
+  [ ] D. Snowpark requires a separate cluster outside of Snowflake for computations.
+  [ ] E. Columns in different DataFrames with the same name should be referred to with squared brackets.
+
+--------------------------------------------------------------------------------
+
+Question 13:
+Type: SINGLE
+The following is returned from SYSTEM$CLUSTERING_INFORMATION() for a table named ORDERS with a DATE column named O_ORDERDATE:What does the total_constant_partition_count value indicate about this table?
+
+  [✓] A. The table is clustered very well on O_ORDERDATE, as there are 493 micro-partitions that could not be significantly improved by reclustering.
+  [ ] B. The table is not clustered well on O_ORDERDATE, as there are 493 micro-partitions where the range of values in that column overlap with every other micro-partition in the table.
+  [ ] C. The data in O_ORDERDATE does not change very often, as there are 493 micro-partitions containing rows where that column has not been modified since the row was created.
+  [ ] D. The data in O_ORDERDATE has a very low cardinality, as there are 493 micro-partitions where there is only a single distinct value in that column for all rows in the micro-partition.
+
+--------------------------------------------------------------------------------
+
+Question 14:
+Type: SINGLE
+A company is building a dashboard for thousands of Analysts. The dashboard presents the results of a few summary queries on tables that are regularly updated. The query conditions vary by topic according to what data each Analyst needs. Responsiveness of the dashboard queries is a top priority, and the data cache should be preserved.How should the Data Engineer configure the compute resources to support this dashboard?
+
+  [ ] A. Assign queries to a multi-cluster virtual warehouse with economy auto-scaling. Allow the system to automatically start and stop clusters according to demand.
+  [✓] B. Assign all queries to a multi-cluster virtual warehouse set to maximized mode. Monitor to determine the smallest suitable number of clusters.
+  [ ] C. Create a virtual warehouse for every 250 Analysts. Monitor to determine how many of these virtual warehouses are being utilized at capacity.
+  [ ] D. Create a size XL virtual warehouse to support all the dashboard queries. Monitor query runtimes to determine whether the virtual warehouse should be resized.
+
+--------------------------------------------------------------------------------
+
+Question 15:
+Type: SINGLE
+A Data Engineer has developed a dashboard that will issue the same SQL select clause to Snowflake every 12 hours.How long will Snowflake use the persisted query results from the result cache, provided that the underlying data has not changed?
+
+  [ ] A. 12 hours
+  [ ] B. 24 hours
+  [ ] C. 14 days
+  [✓] D. 31 days
+
+--------------------------------------------------------------------------------
+
+Question 16:
+Type: SINGLE
+A Data Engineer ran a stored procedure containing various transactions. During the execution, the session abruptly disconnected, preventing one transaction from committing or rolling back. The transaction was left in a detached state and created a lock on resources.What step must the Engineer take to immediately run a new transaction?
+
+  [✓] A. Call the system function SYSTEM$ABORT_TRANSACTION.
+  [ ] B. Call the system function SYSTEM$CANCEL_TRANSACTION.
+  [ ] C. Set the LOCK_TIMEOUT to FALSE in the stored procedure.
+  [ ] D. Set the TRANSACTION_ABORT_ON_ERROR to TRUE in the stored procedure.
+
+--------------------------------------------------------------------------------
+
+Question 17:
+Type: SINGLE
+A database contains a table and a stored procedure defined as:The log_table is initially empty and a Data Engineer issues the following command:CALL insert_log(NULL::VARCHAR);No other operations are affecting the log_table.What will be the outcome of the procedure call?
+
+  [ ] A. The log_table contains zero records and the stored procedure returned 1 as a return value.
+  [ ] B. The log_table contains one record and the stored procedure returned 1 as a return value.
+  [ ] C. The log_table contains one record and the stored procedure returned NULL as a return value.
+  [✓] D. The log_table contains zero records and the stored procedure returned NULL as a return value.
+
+--------------------------------------------------------------------------------
+
+Question 18:
+Type: SINGLE
+When would a Data Engineer use TABLE with the FLATTEN function instead of the LATERAL FLATTEN combination?
+
+  [ ] A. When TABLE with FLATTEN requires another source in the FROM clause to refer to.
+  [✓] B. When TABLE with FLATTEN requires no additional source in the FROM clause to refer to.
+  [ ] C. When the LATERAL FLATTEN combination requires no other source in the FROM clause to refer to.
+  [ ] D. When TABLE with FLATTEN is acting like a sub-query executed for each returned row.
+
+--------------------------------------------------------------------------------
+
+Question 19:
+Type: SINGLE
+Which output is provided by both the SYSTEM$CLUSTERING_DEPTH function and the SYSTEM$CLUSTERING_INFORMATION function?
+
+  [✓] A. average_depth
+  [ ] B. notes
+  [ ] C. average_overlaps
+  [ ] D. total_partition_count
+
+--------------------------------------------------------------------------------
+
+Question 20:
+Type: SINGLE
+A Data Engineer needs to ingest invoice data in PDF format into Snowflake so that the data can be queried and used in a forecasting solution.What is the recommended way to ingest this data?
+
+  [ ] A. Use Snowpipe to ingest the files that land in an external stage into a Snowflake table.
+  [ ] B. Use a COPY INTO command to ingest the PDF files in an external stage into a Snowflake table with a VARIANT column.
+  [ ] C. Create an external table on the PDF files that are stored in a stage and parse the data into structured data.
+  [✓] D. Create a Java User-Defined Function (UDF) that leverages Java-based PDF parser libraries to parse PDF data into structured data.
+
+--------------------------------------------------------------------------------
+
+Question 21:
+Type: SINGLE
+A table is loaded using Snowpipe and truncated afterwards. Later, a Data Engineer finds that the table needs to be reloaded, but the metadata of the pipe will not allow the same files to be loaded again.How can this issue be solved using the LEAST amount of operational overhead?
+
+  [ ] A. Wait until the metadata expires and then reload the file using Snowpipe.
+  [ ] B. Modify the file by adding a blank row to the bottom and re-stage the file.
+  [ ] C. Set the FORCE=TRUE option in the Snowpipe COPY INTO command.
+  [✓] D. Recreate the pipe by using the CREATE OR REPLACE PIPE command.
+
+--------------------------------------------------------------------------------
+
+Question 22:
+Type: SINGLE
+A stream called TRANSACTIONS_STM is created on top of a TRANSACTIONS table in a continuous pipeline running in Snowflake. After a couple of months, the TRANSACTIONS table is renamed TRANSACTIONS_RAW to comply with new naming standards.What will happen to the TRANSACTIONS_STM object?
+
+  [✓] A. TRANSACTIONS_STM will keep working as expected.
+  [ ] B. TRANSACTIONS_STM will be stale and will need to be re-created.
+  [ ] C. TRANSACTIONS_STM will be automatically renamed TRANSACTIONS_RAW_STM.
+  [ ] D. Reading from the TRANSACTIONS_STM stream will succeed for some time after the expected STALE_TIME.
+
+--------------------------------------------------------------------------------
+
+Question 23:
+Type: MULTIPLE
+A Data Engineer is evaluating the performance of a query in a development environment.Based on the Query Profile, what are some performance tuning options the Engineer can use? (Choose two.)
+
+  [✓] A. Add a LIMIT to the ORDER BY if possible
+  [ ] B. Use a multi-cluster virtual warehouse with the scaling policy set to standard
+  [✓] C. Move the query to a larger virtual warehouse
+  [ ] D. Create indexes to ensure sorted access to data
+  [ ] E. Increase the MAX_CLUSTER_COUNT
+
+--------------------------------------------------------------------------------
+
+Question 24:
+Type: MULTIPLE
+Which methods will trigger an action that will evaluate a DataFrame? (Choose two.)
+
+  [ ] A. DataFrame.random_split()
+  [✓] B. DataFrame.collect()
+  [ ] C. DataFrame.select()
+  [ ] D. DataFrame.col()
+  [✓] E. DataFrame.show()
+
+--------------------------------------------------------------------------------
+
+Question 25:
+Type: MULTIPLE
+Which Snowflake objects does the Snowflake Kafka connector use? (Choose three.)
+
+  [✓] A. Pipe
+  [ ] B. Serverless task
+  [ ] C. Internal user stage
+  [✓] D. Internal table stage
+  [✓] E. Internal named stage
+  [ ] F. Storage integration
+
+--------------------------------------------------------------------------------
+
+Question 26:
+Type: SINGLE
+What is a characteristic of the use of external tokenization?
+
+  [ ] A. Secure data sharing can be used with external tokenization.
+  [ ] B. External tokenization cannot be used with database replication.
+  [ ] C. Pre-loading of unmasked data is supported with external tokenization.
+  [✓] D. External tokenization allows the preservation of analytical values after de-identification.
+
+--------------------------------------------------------------------------------
+
+Question 27:
+Type: MULTIPLE
+A Data Engineer is implementing a near real-time ingestion pipeline to load data into Snowflake using the Snowflake Kafka connector. There will be three Kafka topics created.Which Snowflake objects are created automatically when the Kafka connector starts? (Choose three.)
+
+  [✓] A. Tables
+  [ ] B. Tasks
+  [✓] C. Pipes
+  [✓] D. Internal stages
+  [ ] E. External stages
+  [ ] F. Materialized views
+
+--------------------------------------------------------------------------------
+
+Question 28:
+Type: SINGLE
+The following chart represents the performance of a virtual warehouse over time:A Data Engineer notices that the warehouse is queueing queries. The warehouse is size X-Small, the minimum and maximum cluster counts are set to 1, the scaling policy is set to standard, and auto-suspend is set to 10 minutes.How can the performance be improved?
+
+  [✓] A. Change the cluster settings.
+  [ ] B. Increase the size of the warehouse.
+  [ ] C. Change the scaling policy to economy.
+  [ ] D. Change auto-suspend to a longer time frame.
+
+--------------------------------------------------------------------------------
+
+Question 29:
+Type: SINGLE
+A secure function returns data coming through an inbound share.What will happen if a Data Engineer tries to assign USAGE privileges on this function to an outbound share?
+
+  [✓] A. An error will be returned because the Engineer cannot share data that has already been shared.
+  [ ] B. An error will be returned because only views and secure stored procedures can be shared.
+  [ ] C. An error will be returned because only secure functions can be shared with inbound shares.
+  [ ] D. The Engineer will be able to share the secure function with other accounts.
+
+--------------------------------------------------------------------------------
+
+Question 30:
+Type: MULTIPLE
+Which functions will compute a 'fingerprint' over an entire table, query result, or window to quickly detect changes to table contents or query results? (Choose two.)
+
+  [ ] A. HASH(*)
+  [✓] B. HASH_AGG(*)
+  [✓] C. HASH_AGG(<expr>, <expr>)
+  [ ] D. HASH_AGG_COMPARE(*)
+  [ ] E. HASH_COMPARE(*)
+
+--------------------------------------------------------------------------------
+
+Question 31:
+Type: SINGLE
+Which stages support external tables?
+
+  [ ] A. Internal stages only; within a single Snowflake account
+  [ ] B. Internal stages only; from any Snowflake account in the organization
+  [✓] C. External stages only; from any region, and any cloud provider
+  [ ] D. External stages only; only on the same region and cloud provider as the Snowflake account
+
+--------------------------------------------------------------------------------
+
+Question 32:
+Type: SINGLE
+A Data Engineer wants to check the status of a pipe named my_pipe. The pipe is inside a database named test and a schema named Extract (case-sensitive).Which query will provide the status of the pipe?
+
+  [ ] A. SELECT SYSTEM$PIPE_STATUS("test.'extract'.my_pipe");
+  [✓] B. SELECT SYSTEM$PIPE_STATUS('test."Extract".my_pipe');
+  [ ] C. SELECT * FROM SYSTEM$PIPE_STATUS('test."Extract".my_pipe');
+  [ ] D. SELECT * FROM SYSTEM$PIPE_STATUS("test.'extract'.my_pipe");
+
+--------------------------------------------------------------------------------
+
+Question 33:
+Type: MULTIPLE
+Company A and Company B both have Snowflake accounts. Company A's account is hosted on a different cloud provider and region than Company B's account. Companies A and B are not in the same Snowflake organization.How can Company A share data with Company B? (Choose two.)
+
+  [✓] A. Create a share within Company A's account and add Company B's account as a recipient of that share.
+  [ ] B. Create a share within Company A's account, and create a reader account that is a recipient of the share. Grant Company B access to the reader account.
+  [ ] C. Use database replication to replicate Company A's data into Company B's account. Create a share within Company B's account and grant users within Company B's account access to the share.
+  [✓] D. Create a new account within Company A's organization in the same cloud provider and region as Company B's account. Use database replication to replicate Company A's data to the new account. Create a share within the new account, and add Company B's account as a recipient of that share.
+  [ ] E. Create a separate database within Company A's account to contain only those data sets they wish to share with Company B. Create a share within Company A's account and add all the objects within this separate database to the share. Add Company B's account as a recipient of the share.
+
+--------------------------------------------------------------------------------
+
+Question 34:
+Type: SINGLE
+A Data Engineer is trying to load the following rows from a CSV file into a table in Snowflake with the following structure:The engineer is using the following COPY INTO statement:However, the following error is received:Number of columns in file (6) does not match that of the corresponding table (3), use file format option error_on_column_count_mismatch=false to ignore this error File 'address.csv.gz', line 3, character 1 Row 1 starts at line 2, column "STGCUSTOMER"[6] If you would like to continue loading when an error is encountered, use other values such as 'SKIP_FILE' or 'CONTINUE' for the ON_ERROR option.Which file format option should be used to resolve the error and successfully load all the data into the table?
+
+  [ ] A. ESCAPE_UNENCLOSED FIELD = '\\'
+  [ ] B. ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+  [ ] C. FIELD_DELIMITER = ','
+  [✓] D. FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+
+--------------------------------------------------------------------------------
+
+Question 35:
+Type: SINGLE
+A Data Engineer is working on a continuous data pipeline which receives data from Amazon Kinesis Firehose and loads the data into a staging table which will later be used in the data transformation process. The average file size is 300-500 MB.The Engineer needs to ensure that Snowpipe is performant while minimizing costs.How can this be achieved?
+
+  [ ] A. Increase the size of the virtual warehouse used by Snowpipe.
+  [ ] B. Split the files before loading them and set the SIZE_LIMIT option to 250 MB.
+  [ ] C. Change the file compression size and increase the frequency of the Snowpipe loads.
+  [✓] D. Decrease the buffer size to trigger delivery of files sized between 100 to 250 MB in Kinesis Firehose.
+
+--------------------------------------------------------------------------------
+
+Question 36:
+Type: SINGLE
+Within a Snowflake account. permissions have been defined with custom roles and role hierarchies.To set up column-level masking using a role in the hierarchy of the current user, what command would be used?
+
+  [ ] A. CURRENT_ROLE
+  [ ] B. INVOKER_ROLE
+  [ ] C. IS_ROLE_IN_SESSION
+  [✓] D. IS_GRANTED_TO_INVOKER_ROLE
+
+--------------------------------------------------------------------------------
+
+Question 37:
+Type: MULTIPLE
+Assuming a Data Engineer has all appropriate privileges and context, which statements would be used to assess whether the User-Defined Function (UDF), MYDATABASE.SALES.REVENUE_BY_REGION, exists and is secure? (Choose two.)
+
+  [✓] A. SHOW USER FUNCTIONS LIKE 'REVENUE_BY_REGION' IN SCHEMA SALES;
+  [ ] B. SELECT IS_SECURE FROM SNOWFLAKE.INFORMATION_SCHEMA.FUNCTIONS WHERE FUNCTION_SCHEMA = 'SALES' AND FUNCTION_NAME = 'REVENUE_BY_REGION';
+  [✓] C. SELECT IS_SECURE FROM INFORMATION_SCHEMA.FUNCTIONS WHERE FUNCTION_SCHEMA = 'SALES' AND FUNCTION_NAME = 'REVENUE_BY_REGION';
+  [ ] D. SHOW EXTERNAL FUNCTIONS LIKE 'REVENUE_BY_REGION' IN SCHEMA SALES;
+  [ ] E. SHOW SECURE FUNCTIONS LIKE 'REVENUE_BY_REGION' IN SCHEMA SALES;
+
+--------------------------------------------------------------------------------
+
+Question 38:
+Type: SINGLE
+A Data Engineer has written a stored procedure that will run with caller's rights. The Engineer has granted ROLEA the right to use this stored procedure.What is a characteristic of the stored procedure being called using ROLEA?
+
+  [ ] A. The stored procedure must run with caller's rights; it cannot be converted later to run with owner's rights.
+  [✓] B. If the stored procedure accesses an object that ROLEA does not have access to, the stored procedure will fail.
+  [ ] C. The stored procedure will run in the context (database and schema) where the owner created the stored procedure.
+  [ ] D. ROLEA will not be able to see the source code for the stored procedure, even though the role has usage privileges on the stored procedure.
+
+--------------------------------------------------------------------------------
+
+Question 39:
+Type: SINGLE
+What is a characteristic of the use of binding variables in JavaScript stored procedures in Snowflake?
+
+  [ ] A. All types of JavaScript variables can be bound.
+  [ ] B. All Snowflake first-class objects can be bound.
+  [✓] C. Only JavaScript variables of type number, string, and SfDate can be bound.
+  [ ] D. Users are restricted from binding JavaScript variables because they create SQL injection attack vulnerabilities.
+
+--------------------------------------------------------------------------------
+
+Question 40:
+Type: SINGLE
+Which use case would be BEST suited for the search optimization service?
+
+  [ ] A. Analysts who need to perform aggregates over high-cardinality columns.
+  [✓] B. Business users who need fast response times using highly selective filters.
+  [ ] C. Data Scientists who seek specific JOIN statements with large volumes of data.
+  [ ] D. Data Engineers who create clustered tables with frequent reads against clustering keys.
+
+--------------------------------------------------------------------------------
+
+Question 41:
+Type: SINGLE
+What is a characteristic of the operations of streams in Snowflake?
+
+  [ ] A. Whenever a stream is queried, the offset is automatically advanced.
+  [✓] B. When a stream is used to update a target table, the offset is advanced to the current time.
+  [ ] C. Querying a stream returns all change records and table rows from the current offset to the current time.
+  [ ] D. Each committed and uncommitted transaction on the source table automatically puts a change record in the stream.
+
+--------------------------------------------------------------------------------
+
+Question 42:
+Type: SINGLE
+At what isolation level are Snowflake streams?
+
+  [ ] A. Snapshot
+  [✓] B. Repeatable read
+  [ ] C. Read committed
+  [ ] D. Read uncommitted
+
+--------------------------------------------------------------------------------
+
+Question 43:
+Type: SINGLE
+What kind of Snowflake integration is required when defining an external function in Snowflake?
+
+  [✓] A. API integration
+  [ ] B. HTTP integration
+  [ ] C. Notification integration
+  [ ] D. Security integration
+
+--------------------------------------------------------------------------------
+
+Question 44:
+Type: MULTIPLE
+A Data Engineer is writing a Python script using the Snowflake Connector for Python. The Engineer will use the snowflake.connector.connect function to connect to Snowflake.The requirements are:Raise an exception if the specified database, schema, or warehouse does not existImprove download performance -Which parameters of the connect function should be used? (Choose two.)
+
+  [ ] A. authenticator
+  [ ] B. arrow_number_to_decimal
+  [✓] C. client_prefetch_threads
+  [ ] D. client_session_keep_alive
+  [✓] E. validate_default_parameters
+
+--------------------------------------------------------------------------------
+
+Question 45:
+Type: SINGLE
+A Data Engineer wants to centralize grant management to maximize security. A user needs OWNERSHIP on a table in a new schema. However, this user should not have the ability to make grant decisions.What is the correct way to do this?
+
+  [ ] A. Grant OWNERSHIP to the user on the table.
+  [ ] B. Revoke grant decisions from the user on the table.
+  [ ] C. Revoke grant decisions from the user on the schema.
+  [✓] D. Add the WITH MANAGED ACCESS parameter on the schema.
+
+--------------------------------------------------------------------------------
+
+Question 46:
+Type: SINGLE
+A CSV file, around 1 TB in size, is generated daily on an on-premise server. A corresponding table, internal stage, and file format have already been created in Snowflake to facilitate the data loading process.How can the process of bringing the CSV file into Snowflake be automated using the LEAST amount of operational overhead?
+
+  [ ] A. Create a task in Snowflake that executes once a day and runs a COPY INTO statement that references the internal stage. The internal stage will read the files directly from the on-premise server and copy the newest file into the table from the on-premise server to the Snowflake table.
+  [✓] B. On the on-premise server, schedule a SQL file to run using SnowSQL that executes a PUT to push a specific file to the internal stage. Create a task that executes once a day in Snowflake and runs a COPY INTO statement that references the internal stage. Schedule the task to start after the file lands in the internal stage.
+  [ ] C. On the on-premise server, schedule a SQL file to run using SnowSQL that executes a PUT to push a specific file to the internal stage. Create a pipe that runs a COPY INTO statement that references the internal stage. Snowpipe auto-ingest will automatically load the file from the internal stage when the new file lands in the internal stage.
+  [ ] D. On the on-premise server, schedule a Python file that uses the Snowpark Python library. The Python script will read the CSV data into a DataFrame and generate an INSERT INTO statement that will directly load into the table. The script will bypass the need to move a file into an internal stage.
+
+--------------------------------------------------------------------------------
+
+Question 47:
+Type: MULTIPLE
+What are characteristics of Snowpark Python packages? (Choose three.)
+
+  [✓] A. Third-party packages can be registered as a dependency to the Snowpark session using the session.import() method.
+  [ ] B. Python packages can access any external endpoints.
+  [ ] C. Python packages can only be loaded in a local environment.
+  [ ] D. Third-party supported Python packages are locked down to prevent hitting.
+  [✓] E. The SQL command DESCRIBE FUNCTION will list the imported Python packages of the Python User-Defined Function (UDF).
+  [✓] F. Querying information_schema.packages will provide a list of supported Python packages and versions.
+
+--------------------------------------------------------------------------------
+
