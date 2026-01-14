@@ -3,48 +3,38 @@ import re
 from typing import List, Dict, Set
 from bs4 import BeautifulSoup
 from pathlib import Path
+import glob
 
 
-def scrape_examtopics_page(html_content: str) -> List[Dict]:
+def scrape_examtopics_page(html_content: str, source_file: str = "") -> List[Dict]:
     """
     Extract questions from ExamTopics HTML.
     Handles both single and multiple correct answers.
     """
     soup = BeautifulSoup(html_content, 'html.parser')
     questions = []
-    seen_questions = set()  # For duplicate detection
     
     # Find all question cards
     question_cards = soup.find_all('div', class_='card exam-question-card')
     
-    print(f"Found {len(question_cards)} question cards")
+    print(f"  Found {len(question_cards)} question cards in {source_file}")
     
     for idx, card in enumerate(question_cards, 1):
         try:
             # Extract question text
             question_text = extract_question_text(card)
             if not question_text or len(question_text) < 10:
-                print(f"  Question {idx}: Skipped (no valid text)")
                 continue
-            
-            # Check for duplicates using normalized text
-            normalized_q = normalize_text(question_text)
-            if normalized_q in seen_questions:
-                print(f"  Question {idx}: Skipped (duplicate)")
-                continue
-            seen_questions.add(normalized_q)
             
             # Extract answers from question-choices-container
             answer_data = extract_answers(card)
             if not answer_data or not answer_data['all_answers']:
-                print(f"  Question {idx}: Skipped (no answers found)")
                 continue
             
             all_answers = answer_data['all_answers']
             correct_answers = answer_data['correct_answers']
             
             if not correct_answers:
-                print(f"  Question {idx}: Warning (no correct answer marked)")
                 # Still include it, but mark as needing review
                 correct_answers = [all_answers[0]]  # Default to first answer
             
@@ -57,14 +47,14 @@ def scrape_examtopics_page(html_content: str) -> List[Dict]:
                 'all_answers': all_answers,
                 'correct_answers': correct_answers,
                 'is_multiple': is_multiple,
-                'tags': 'snowpro-advanced-architect examtopics'
+                'tags': 'snowpro-advanced-architect examtopics',
+                'source_file': source_file  # Track which file this came from
             }
             
             questions.append(question_dict)
-            print(f"  Question {idx}: ✓ Extracted ({len(all_answers)} choices, {len(correct_answers)} correct)")
             
         except Exception as e:
-            print(f"  Question {idx}: Error - {e}")
+            print(f"    Question {idx}: Error - {e}")
             continue
     
     return questions
@@ -182,6 +172,47 @@ def reorder_answers_for_anki(all_answers: List[str], correct_answers: List[str])
     return reordered
 
 
+def scrape_from_files(html_files: List[str]) -> List[Dict]:
+    """Load and parse HTML from multiple files"""
+    all_questions = []
+    seen_questions = set()  # For global duplicate detection
+    
+    print(f"\n{'='*60}")
+    print(f"Processing {len(html_files)} HTML file(s)")
+    print(f"{'='*60}\n")
+    
+    for html_file in html_files:
+        print(f"📄 Processing: {html_file}")
+        
+        try:
+            with open(html_file, 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            
+            questions = scrape_examtopics_page(html_content, Path(html_file).name)
+            
+            # Remove duplicates across all files
+            before_dedup = len(questions)
+            unique_questions = []
+            
+            for q in questions:
+                normalized_q = normalize_text(q['question'])
+                if normalized_q not in seen_questions:
+                    seen_questions.add(normalized_q)
+                    unique_questions.append(q)
+            
+            duplicates = before_dedup - len(unique_questions)
+            if duplicates > 0:
+                print(f"    Removed {duplicates} duplicate(s)")
+            
+            all_questions.extend(unique_questions)
+            print(f"  ✓ Added {len(unique_questions)} unique questions")
+            
+        except Exception as e:
+            print(f"  ✗ Error processing {html_file}: {e}")
+    
+    return all_questions
+
+
 def create_anki_csv(questions: List[Dict], output_file: str = "examtopics_deck.csv"):
     """
     Create Anki-compatible CSV for Multiple Choice add-on.
@@ -190,7 +221,20 @@ def create_anki_csv(questions: List[Dict], output_file: str = "examtopics_deck.c
     """
     with open(output_file, 'w', encoding='utf-8', newline='') as f:
         writer = csv.writer(f)
-        
+        # Header row (column names)
+        writer.writerow(
+            [
+                "Question",   # Field 1
+                "QType",      # Field 2 (1=multiple, 2=Single)
+                "Answers",    # Field 3 (e.g., "1 0 0 1 0")
+                "Q_1",        # Field 4
+                "Q_2",        # Field 5
+                "Q_3",        # Field 6
+                "Q_4",        # Field 7
+                "Q_5",        # Field 8
+                "Tags",       # Field 9
+            ]
+        )
         single_count = 0
         multiple_count = 0
         truncated_count = 0
@@ -229,7 +273,7 @@ def create_anki_csv(questions: List[Dict], output_file: str = "examtopics_deck.c
             # Determine QType
             # 2 = Single choice (radio buttons)
             # 3 = Multiple choice (checkboxes)
-            qtype = '3' if is_multiple else '2'
+            qtype = '1' if is_multiple else '2'
             
             # Build row - pad with empty strings if less than 5 answers
             row = [
@@ -255,13 +299,6 @@ def create_anki_csv(questions: List[Dict], output_file: str = "examtopics_deck.c
         print(f"{'='*60}")
 
 
-def scrape_from_file(html_file: str) -> List[Dict]:
-    """Load and parse HTML from a saved file"""
-    with open(html_file, 'r', encoding='utf-8') as f:
-        html_content = f.read()
-    return scrape_examtopics_page(html_content)
-
-
 def preview_questions(questions: List[Dict], count: int = 3):
     """Preview first few questions"""
     print("\n" + "=" * 60)
@@ -270,6 +307,7 @@ def preview_questions(questions: List[Dict], count: int = 3):
     
     for i, q in enumerate(questions[:count], 1):
         print(f"\n--- Question {i} ---")
+        print(f"Source: {q.get('source_file', 'Unknown')}")
         print(f"Type: {'MULTIPLE CHOICE' if q['is_multiple'] else 'SINGLE CHOICE'}")
         print(f"Q: {q['question'][:200]}{'...' if len(q['question']) > 200 else ''}")
         print(f"\nAnswers ({len(q['all_answers'])} total):")
@@ -286,7 +324,7 @@ def export_summary(questions: List[Dict], output_file: str = "questions_summary.
         f.write("=" * 80 + "\n\n")
         
         for i, q in enumerate(questions, 1):
-            f.write(f"Question {i}:\n")
+            f.write(f"Question {i} (from {q.get('source_file', 'Unknown')}):\n")
             f.write(f"Type: {'MULTIPLE' if q['is_multiple'] else 'SINGLE'}\n")
             f.write(f"{q['question']}\n\n")
             
@@ -299,19 +337,52 @@ def export_summary(questions: List[Dict], output_file: str = "questions_summary.
     print(f"✓ Summary exported to {output_file}")
 
 
+def find_html_files(pattern: str = "*.html") -> List[str]:
+    """Find all HTML files matching the pattern"""
+    files = glob.glob(pattern)
+    print(files)
+    return sorted(files)
+
+
 # Main workflow
 if __name__ == "__main__":
     
     print("=" * 60)
-    print("ExamTopics to Anki Converter")
+    print("ExamTopics to Anki Converter - Multi-File Edition")
     print("Snowflake SnowPro Advanced Architect")
     print("=" * 60)
     
-    html_file = "SnowPro Advanced Data Engineer Exam - Free Actual Q&As, Page 1 _ ExamTopics.html"
+    # Find all HTML files in current directory
+    html_files = find_html_files("*.html")
     
-    if Path(html_file).exists():
-        print(f"\n📄 Processing {html_file}...\n")
-        questions = scrape_from_file(html_file)
+    # Alternative: Specify files manually
+    # html_files = ["exam_page1.html", "exam_page2.html", "exam_page3.html"]
+    
+    # Alternative: Find files with specific pattern
+    # html_files = find_html_files("exam_*.html")
+    
+    if not html_files:
+        print(f"\n⚠ No HTML files found!")
+        print("\n📋 INSTRUCTIONS:")
+        print("=" * 60)
+        print("1. Save your ExamTopics pages as HTML files")
+        print("2. Name them anything.html (e.g., page1.html, page2.html, etc.)")
+        print("3. Place all files in the same folder as this script")
+        print("\nOR")
+        print("\nEdit the script to specify files manually:")
+        print('  html_files = ["file1.html", "file2.html"]')
+        print("\nOR")
+        print("\nUse a pattern to match specific files:")
+        print('  html_files = find_html_files("exam_*.html")')
+        print("=" * 60)
+        
+    else:
+        print(f"\nFound {len(html_files)} HTML file(s):")
+        for f in html_files:
+            print(f"  - {f}")
+        
+        # Process all files
+        questions = scrape_from_files(html_files)
         
         if questions:
             # Preview
@@ -346,28 +417,9 @@ if __name__ == "__main__":
             print("=" * 60)
             
         else:
-            print("\n⚠ No questions extracted!")
+            print("\n⚠ No questions extracted from any file!")
             print("\nTroubleshooting:")
-            print("1. Make sure you're logged into ExamTopics")
+            print("1. Make sure you're logged into ExamTopics when saving")
             print("2. Make sure answers are revealed (click to show correct answers)")
-            print("3. Save the page AFTER all content is loaded")
+            print("3. Save pages AFTER all content is loaded")
             print("4. Check if the page structure has changed")
-            
-    else:
-        print(f"\n⚠ File '{html_file}' not found!")
-        print("\n📋 STEP-BY-STEP INSTRUCTIONS:")
-        print("=" * 60)
-        print("1. Open your browser and go to:")
-        print("   https://www.examtopics.com/exams/snowflake/snowpro-advanced-architect/view/")
-        print("\n2. Log in to ExamTopics")
-        print("\n3. Navigate to the questions page")
-        print("\n4. IMPORTANT: Click on answers to reveal the correct ones")
-        print("   (The correct-choice class is only added when revealed)")
-        print("\n5. Scroll through to ensure all content is loaded")
-        print("\n6. Right-click anywhere → 'Save As' (or Ctrl+S)")
-        print("   - Save as: 'exam_page.html'")
-        print("   - Save type: 'Webpage, Complete' or 'HTML Only'")
-        print("\n7. Place the file in the same folder as this script")
-        print("\n8. Run this script again:")
-        print("   python examtopics_scraper.py")
-        print("=" * 60)
