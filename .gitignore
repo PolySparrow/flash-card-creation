@@ -8,3 +8,5 @@ SnowPro */*
 *.html
 *.mhtml
 dbt*.zip
+*.csv
+*.txt
