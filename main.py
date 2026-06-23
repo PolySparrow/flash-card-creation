@@ -6,9 +6,13 @@ from pathlib import Path
 import glob
 
 
+MAX_ANSWERS = 12
+
+
 # ---------------------------------------------------------------------------
 # ExamTopics parsers
 # ---------------------------------------------------------------------------
+
 
 def scrape_examtopics_page(html_content: str, source_file: str = "") -> List[Dict]:
     soup = BeautifulSoup(html_content, "html.parser")
@@ -41,6 +45,7 @@ def scrape_examtopics_page(html_content: str, source_file: str = "") -> List[Dic
                     "all_answers": all_answers,
                     "correct_answers": correct_answers,
                     "is_multiple": is_multiple,
+                    "answer_explanations": {},
                     "explanation": "",  # ExamTopics has no explanations
                     "tags": "snowpro-advanced-architect examtopics",
                     "source_file": source_file,
@@ -109,6 +114,7 @@ def extract_answers(card) -> Dict:
 # Udemy parser
 # ---------------------------------------------------------------------------
 
+
 def scrape_udemy_page(html_content: str, source_file: str = "") -> List[Dict]:
     """
     Extract questions from a Udemy practice-test results HTML page.
@@ -149,7 +155,7 @@ def scrape_udemy_page(html_content: str, source_file: str = "") -> List[Dict]:
             # --- Answers + per-answer explanations ---
             all_answers: List[str] = []
             correct_answers: List[str] = []
-            per_answer_explanations: List[str] = []
+            answer_explanations: Dict[str, str] = {}
 
             answer_panes = block.find_all(
                 "div",
@@ -186,12 +192,7 @@ def scrape_udemy_page(html_content: str, source_file: str = "") -> List[Dict]:
                     )
                     explanation_text = re.sub(r"\s+", " ", explanation_text).strip()
                     if explanation_text:
-                        # Prefix with answer text so it's clear which answer
-                        # the explanation belongs to
-                        per_answer_explanations.append(
-                            f"[{ans_text[:60]}{'...' if len(ans_text) > 60 else ''}]"
-                            f" {explanation_text}"
-                        )
+                        answer_explanations[ans_text] = explanation_text
 
             if not all_answers:
                 print(f"    Question {idx}: No answers found, skipping")
@@ -207,23 +208,14 @@ def scrape_udemy_page(html_content: str, source_file: str = "") -> List[Dict]:
             overall_explanation = ""
             overall_div = block.find(id="overall-explanation")
             if overall_div:
-                overall_explanation = overall_div.get_text(
-                    separator=" ", strip=True
-                )
+                overall_explanation = overall_div.get_text(separator=" ", strip=True)
                 overall_explanation = re.sub(
                     r"\s+", " ", overall_explanation
                 ).strip()
 
-            # --- Combine explanations ---
-            # Overall explanation first, then per-answer breakdowns
-            explanation_parts = []
-            if overall_explanation:
-                explanation_parts.append(f"OVERALL: {overall_explanation}")
-            if per_answer_explanations:
-                explanation_parts.append("PER ANSWER:")
-                explanation_parts.extend(per_answer_explanations)
-
-            combined_explanation = " | ".join(explanation_parts)
+            combined_explanation = (
+                f"OVERALL: {overall_explanation}" if overall_explanation else ""
+            )
 
             is_multiple = len(correct_answers) > 1
 
@@ -233,6 +225,7 @@ def scrape_udemy_page(html_content: str, source_file: str = "") -> List[Dict]:
                     "all_answers": all_answers,
                     "correct_answers": correct_answers,
                     "is_multiple": is_multiple,
+                    "answer_explanations": answer_explanations,
                     "explanation": combined_explanation,
                     "tags": "udemy",
                     "source_file": source_file,
@@ -249,6 +242,7 @@ def scrape_udemy_page(html_content: str, source_file: str = "") -> List[Dict]:
 # ---------------------------------------------------------------------------
 # Shared utilities
 # ---------------------------------------------------------------------------
+
 
 def detect_source(html_content: str) -> str:
     if "result-pane--question-result-pane--" in html_content:
@@ -267,18 +261,19 @@ def normalize_text(text: str) -> str:
 def reorder_answers_for_anki(
     all_answers: List[str], correct_answers: List[str]
 ) -> List[str]:
-    if len(all_answers) <= 5:
+    if len(all_answers) <= MAX_ANSWERS:
         return all_answers
 
     correct = [a for a in all_answers if a in correct_answers]
     wrong = [a for a in all_answers if a not in correct_answers]
-    slots_remaining = 5 - len(correct)
+    slots_remaining = MAX_ANSWERS - len(correct)
 
     if slots_remaining < 0:
         print(
-            f"    Warning: Question has {len(correct)} correct answers, truncating to 5"
+            f"    Warning: Question has {len(correct)} correct answers,"
+            f" truncating to {MAX_ANSWERS}"
         )
-        return correct[:5]
+        return correct[:MAX_ANSWERS]
 
     return correct + wrong[:slots_remaining]
 
@@ -331,23 +326,24 @@ def scrape_from_files(html_files: List[str]) -> List[Dict]:
 # Anki CSV export
 # ---------------------------------------------------------------------------
 
+
 def create_anki_csv(
     questions: List[Dict], output_file: str = "examtopics_deck.csv"
 ):
+    answer_fields = [f"Q_{i}" for i in range(1, MAX_ANSWERS + 1)]
+    explanation_fields = [f"E_{i}" for i in range(1, MAX_ANSWERS + 1)]
+
     with open(output_file, "w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(
             [
-                "Question",      # Field 1
-                "QType",         # Field 2 (1=multiple, 2=single)
-                "Answers",       # Field 3 (e.g., "1 0 0 1 0")
-                "Q_1",           # Field 4
-                "Q_2",           # Field 5
-                "Q_3",           # Field 6
-                "Q_4",           # Field 7
-                "Q_5",           # Field 8
-                "Explanation",   # Field 9
-                "Tags",          # Field 10
+                "Question",          # Field 1
+                "QType",             # Field 2  (1=multiple, 2=single)
+                "Answers",           # Field 3  (e.g. "1 0 0 1 0 ...")
+                *answer_fields,      # Fields 4-15  (Q_1 … Q_12)
+                *explanation_fields, # Fields 16-27 (E_1 … E_12)
+                "Explanation",       # Field 28 (overall)
+                "Tags",              # Field 29
             ]
         )
 
@@ -359,11 +355,12 @@ def create_anki_csv(
             question = q["question"]
             all_answers = q["all_answers"]
             correct_answers = q["correct_answers"]
+            answer_explanations = q.get("answer_explanations", {})
             is_multiple = q["is_multiple"]
             explanation = q.get("explanation", "")
             tags = q.get("tags", "")
 
-            if len(all_answers) > 5:
+            if len(all_answers) > MAX_ANSWERS:
                 all_answers = reorder_answers_for_anki(all_answers, correct_answers)
                 truncated_count += 1
 
@@ -376,21 +373,29 @@ def create_anki_csv(
 
             answer_flags = [
                 "1" if ans in correct_answers else "0"
-                for ans in all_answers[:5]
+                for ans in all_answers[:MAX_ANSWERS]
             ]
             answer_string = " ".join(answer_flags)
 
             qtype = "1" if is_multiple else "2"
 
+            ans_cells = [
+                all_answers[i] if i < len(all_answers) else ""
+                for i in range(MAX_ANSWERS)
+            ]
+            exp_cells = [
+                answer_explanations.get(all_answers[i], "")
+                if i < len(all_answers)
+                else ""
+                for i in range(MAX_ANSWERS)
+            ]
+
             row = [
                 question,
                 qtype,
                 answer_string,
-                all_answers[0] if len(all_answers) > 0 else "",
-                all_answers[1] if len(all_answers) > 1 else "",
-                all_answers[2] if len(all_answers) > 2 else "",
-                all_answers[3] if len(all_answers) > 3 else "",
-                all_answers[4] if len(all_answers) > 4 else "",
+                *ans_cells,
+                *exp_cells,
                 explanation,
                 tags,
             ]
@@ -398,16 +403,19 @@ def create_anki_csv(
 
         print(f"\n{'='*60}")
         print(f"✓ Created {len(questions)} unique cards in {output_file}")
-        print(f"  - Single answer questions: {single_count}")
-        print(f"  - Multiple answer questions: {multiple_count}")
+        print(f"  - Single answer questions:           {single_count}")
+        print(f"  - Multiple answer questions:         {multiple_count}")
         if truncated_count > 0:
-            print(f"  - Questions with >5 choices (reordered): {truncated_count}")
+            print(
+                f"  - Questions with >{MAX_ANSWERS} choices (reordered): {truncated_count}"
+            )
         print(f"{'='*60}")
 
 
 # ---------------------------------------------------------------------------
 # Review / preview helpers
 # ---------------------------------------------------------------------------
+
 
 def preview_questions(questions: List[Dict], count: int = 3):
     print("\n" + "=" * 60)
@@ -423,12 +431,19 @@ def preview_questions(questions: List[Dict], count: int = 3):
             f"{'...' if len(q['question']) > 200 else ''}"
         )
         print(f"\nAnswers ({len(q['all_answers'])} total):")
+        answer_explanations = q.get("answer_explanations", {})
         for j, ans in enumerate(q["all_answers"], 1):
             marker = "✓✓✓" if ans in q["correct_answers"] else "   "
             print(
                 f"  {marker} {chr(64+j)}. {ans[:100]}"
                 f"{'...' if len(ans) > 100 else ''}"
             )
+            exp = answer_explanations.get(ans, "")
+            if exp:
+                print(
+                    f"         ↳ {exp[:120]}"
+                    f"{'...' if len(exp) > 120 else ''}"
+                )
         print(f"\nCorrect answers: {len(q['correct_answers'])}")
         if q.get("explanation"):
             print(
@@ -451,9 +466,13 @@ def export_summary(
             f.write(f"Type: {'MULTIPLE' if q['is_multiple'] else 'SINGLE'}\n")
             f.write(f"{q['question']}\n\n")
 
+            answer_explanations = q.get("answer_explanations", {})
             for j, ans in enumerate(q["all_answers"], 1):
                 marker = "[✓]" if ans in q["correct_answers"] else "[ ]"
                 f.write(f"  {marker} {chr(64+j)}. {ans}\n")
+                exp = answer_explanations.get(ans, "")
+                if exp:
+                    f.write(f"       ↳ {exp}\n")
 
             if q.get("explanation"):
                 f.write(f"\nExplanation:\n{q['explanation']}\n")
@@ -515,16 +534,15 @@ if __name__ == "__main__":
             print("   - Field separator: Comma")
             print("   - Note type: AllInOne (Multiple Choice for Anki)")
             print("5. Map fields:")
-            print("   - Field 1  → Question")
-            print("   - Field 2  → QType")
-            print("   - Field 3  → Answers")
-            print("   - Field 4  → Q_1")
-            print("   - Field 5  → Q_2")
-            print("   - Field 6  → Q_3")
-            print("   - Field 7  → Q_4")
-            print("   - Field 8  → Q_5")
-            print("   - Field 9  → Explanation")
-            print("   - Field 10 → Tags")
+            print("   - Field  1 → Question")
+            print("   - Field  2 → QType")
+            print("   - Field  3 → Answers")
+            for i in range(1, MAX_ANSWERS + 1):
+                print(f"   - Field {3+i:2d} → Q_{i}")
+            for i in range(1, MAX_ANSWERS + 1):
+                print(f"   - Field {15+i:2d} → E_{i}")
+            print(f"   - Field {16+MAX_ANSWERS:2d} → Explanation")
+            print(f"   - Field {17+MAX_ANSWERS:2d} → Tags")
             print("\n💡 Note: Questions with [SELECT N] require multiple answers")
             print("=" * 60)
 
